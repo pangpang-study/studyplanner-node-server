@@ -1,7 +1,7 @@
 {
   "name": "studyplanner-node-server",
   "version": "1.0.0",
-  "description": "[Node] RESTful API Server for StudyPlanner",
+  "description": "\"RESTful API for StudyPlanner\"",
   "main": "index.js",
   "scripts": {
     "start": "nodemon index.js",
@@ -18,7 +18,16 @@
   },
   "homepage": "https://github.com/pangpang-study/studyplanner-node-server#readme",
   "dependencies": {
+    "connect-flash": "^0.1.1",
+    "cookie-parser": "^1.4.5",
+    "dotenv": "^10.0.0",
     "express": "^4.17.1",
+    "express-session": "^1.17.2",
+    "morgan": "^1.10.0",
+    "mysql2": "^2.3.0",
+    "sequelize": "^6.6.5"
+  },
+  "devDependencies": {
     "nodemon": "^2.0.12"
   }
 }
