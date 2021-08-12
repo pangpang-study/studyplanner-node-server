@@ -1,0 +1,24 @@
+{
+  "name": "studyplanner-node-server",
+  "version": "1.0.0",
+  "description": "[Node] RESTful API Server for StudyPlanner",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pangpang-study/studyplanner-node-server.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/pangpang-study/studyplanner-node-server/issues"
+  },
+  "homepage": "https://github.com/pangpang-study/studyplanner-node-server#readme",
+  "dependencies": {
+    "express": "^4.17.1",
+    "nodemon": "^2.0.12"
+  }
+}
