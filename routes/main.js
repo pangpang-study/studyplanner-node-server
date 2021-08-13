@@ -14,4 +14,12 @@ router.get('/test', (req, res) => {
     });
 });
 
+// POST return id, password for test
+router.get('/login', (req, res) => {
+    res.send({
+        "id": req.body.id,
+        "password": req.body.password
+    });
+});
+
 module.exports = router;
