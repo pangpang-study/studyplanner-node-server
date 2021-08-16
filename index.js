@@ -4,6 +4,11 @@ const app = express();
 
 const mainRouter = require('./routes/main');
 
+const swaggerDoc = require('./swaggerDoc');
+
+swaggerDoc(app);
+
+
 app.set('port', process.env.PORT || 5000);
 
 app.use('/', mainRouter);
