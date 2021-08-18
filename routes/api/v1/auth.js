@@ -154,6 +154,22 @@ module.exports = router;
 
 /**
  * @swagger
+ * components:
+ *  schemas:
+ *      Error:
+ *          type: object
+ *          properties:
+ *              code:
+ *                  type: string
+ *              message:
+ *                  type: string
+ *              required:
+ *                  - code
+ *                  - message
+ */
+
+/**
+ * @swagger
  * /auth/join:
  *  post:
  *      tags: [Authentication]
@@ -190,6 +206,10 @@ module.exports = router;
  *              description: OK
  *          401:
  *              description: Unauthorized, Login Required
+ *              content:
+ *                  application/json:
+ *                      schema:
+ *                          $ref: '#/components/schemas/Error'
  *          403:
  *              description: Forbidden, No Permission
  *
