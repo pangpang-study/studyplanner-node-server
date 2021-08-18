@@ -87,7 +87,7 @@ module.exports = router;
  * @swagger
  * tags:
  *      name: Authentication
- *      description: about authentication
+ *      description: about authentication and authorization
  */
 
 /**
@@ -141,6 +141,31 @@ module.exports = router;
 
 /**
  * @swagger
+ * definitions:
+ *      schemas:
+ *          2xx:
+ *              properties:
+ *                  success:
+ *                      type: boolean
+ *                      description: whether it succeed
+ *                  code:
+ *                      type: string
+ *                      description: response status code
+ *          4xx:
+ *              properties:
+ *                  success:
+ *                      type: boolean
+ *                      description: whether it succeed
+ *                  code:
+ *                      type: string
+ *                      description: response status code
+ *                  error:
+ *                      type: string
+ *                      description: error message
+ */
+
+/**
+ * @swagger
  * /auth/logout:
  *  get:
  *      tags: [Authentication]
@@ -150,22 +175,10 @@ module.exports = router;
  *      responses:
  *          200:
  *              description: OK
- */
-
-/**
- * @swagger
- * components:
- *  schemas:
- *      Error:
- *          type: object
- *          properties:
- *              code:
- *                  type: string
- *              message:
- *                  type: string
- *              required:
- *                  - code
- *                  - message
+ *              content:
+ *                  application/json:
+ *                      schema:
+ *                          $ref: '#/definitions/schemas/2xx'
  */
 
 /**
@@ -183,10 +196,22 @@ module.exports = router;
  *      responses:
  *          200:
  *              description: OK
+ *              content:
+ *                  application/json:
+ *                      schema:
+ *                          $ref: '#/definitions/schemas/2xx'
  *          401:
  *              description: Unauthorized, Login Required
+ *              content:
+ *                  application/json:
+ *                      schema:
+ *                          $ref: '#/definitions/schemas/4xx'
  *          403:
  *              description: Forbidden, No Permission
+ *              content:
+ *                  application/json:
+ *                      schema:
+ *                          $ref: '#/definitions/schemas/4xx'
  *
  */
 
@@ -204,13 +229,21 @@ module.exports = router;
  *      responses:
  *          200:
  *              description: OK
+ *              content:
+ *                  application/json:
+ *                      schema:
+ *                          $ref: '#/definitions/schemas/2xx'
  *          401:
  *              description: Unauthorized, Login Required
  *              content:
  *                  application/json:
  *                      schema:
- *                          $ref: '#/components/schemas/Error'
+ *                          $ref: '#/definitions/schemas/4xx'
  *          403:
  *              description: Forbidden, No Permission
+ *              content:
+ *                  application/json:
+ *                      schema:
+ *                          $ref: '#/definitions/schemas/4xx'
  *
  */

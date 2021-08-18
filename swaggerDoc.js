@@ -10,15 +10,6 @@ const options = {
         },
         basePath: '/api/v1/',
     },
-    components: {
-        res: {
-            OK: {
-                description: {
-
-                }
-            }
-        }
-    },
     apis: ['./routes/**/**/*.js'],
 };
 

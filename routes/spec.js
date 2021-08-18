@@ -122,3 +122,19 @@ describe('GET /api/v1/auth/logout', () => {
             });
     });
 });
+
+// GET /api/v1/user
+describe('GET /api/v1/user', () => {
+    it('it should return 200 status code', (done) => {
+        request(app).get('/api/v1/user')
+            .then((res) => {
+                expect(res).to.have.status(200);
+                console.log(res.body);
+                done();
+            })
+            .catch((err) => {
+                console.error(err);
+                done();
+            });
+    });
+});
