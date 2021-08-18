@@ -8,9 +8,18 @@ const options = {
             title: 'PangPang Study Planner',
             version: '1.0.0',
         },
-        basePath: '/',
+        basePath: '/api/v1/',
     },
-    apis: ['./routes/*.js'],
+    components: {
+        res: {
+            OK: {
+                description: {
+
+                }
+            }
+        }
+    },
+    apis: ['./routes/**/**/*.js'],
 };
 
 const spec = swaggerJsdoc(options);

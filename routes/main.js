@@ -1,4 +1,6 @@
 const express = require('express');
+const { isLoggedIn, isNotLoggedIn } = require('../middlewares/auth');
+
 const router = express.Router();
 
 // GET: main page
@@ -8,78 +10,11 @@ router.get('/', (req, res) => {
     });
 });
 
-router.get('/test', (req, res) => {
+router.get('/profile', isLoggedIn, (req, res) => {
     res.send({
-        "value": 1
-    });
-});
-
-router.post('/login', (req, res) => {
-    res.send({
-        "id": req.body.id,
-        "password": req.body.password
+        title: 'User Profile',
+        user: req.user,
     });
 });
 
 module.exports = router;
-
-
-/**
- * @swagger
- * tags:
- *   - name: Authentication
- *     description: about authentication
- */
-
-/**
- * @swagger
- * definitions:
- *      Login:
- *          required:
- *              - id
- *              - password
- *          properties:
- *              id:
- *                  type: string
- *              password:
- *                  type: string
- *              path:
- *                  type: string
- */
-
-/**
- * @swagger
- * parameters:
- *      id:
- *        name: id
- *        description: user id
- *        in: formData
- *        required: true
- *        type: string
- */
-
-/**
- * @swagger
- * /login:
- *  post:
- *      tags: [Authentication]
- *      description: Login to the application
- *      produces:
- *          - application/json
- *      parameters:
- *          - $ref: '#/parameters/id'
- *          - name: password
- *            description: user password
- *            in: formData
- *            required: true
- *            type: string
- *      responses:
- *          200:
- *              description: success to access
- *              content:
- *                  application/json:
- *                      schema:
- *                          type: object
- *                          $ref: "#/definitions/Login"
- *              
- */
