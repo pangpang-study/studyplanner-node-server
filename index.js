@@ -9,9 +9,7 @@ const swaggerDoc = require('./swaggerDoc');
 const { sequelize } = require('./models');
 const passportConfig = require('./passport');
 
-const mainRouter = require('./routes/main');
-const v1ApiAuthRouter = require('./routes/api/v1/auth');
-const v1ApiUserRouter = require('./routes/api/v1/user');
+const v1Router = require('./routes/api/v1');
 
 dotenv.config();
 
@@ -37,9 +35,7 @@ app.use(cookieParser(process.env.COOKIE_SECRET));
 app.use(passport.initialize());     // req 객체에 passport 설정을 심는다.
 app.use(passport.session());        // req.session 객체에 passport 정보를 저장. -> session 보다 뒤에 있어야함.
 
-app.use('/', mainRouter);
-app.use('/api/v1/auth', v1ApiAuthRouter);
-app.use('/api/v1/user', v1ApiUserRouter);
+app.use('/api/v1', v1Router);
 
 app.use((err, req, next) => {
     const error = new Error(`${req.method} ${req.url} 라우터가 없습니다.`);

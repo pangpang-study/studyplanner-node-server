@@ -1,3 +1,4 @@
+const { verifyAccess, verifyRefresh } = require('../utils/jwt');
 const jwt = require('jsonwebtoken');
 
 // 권한이 필요한 요청이 들어올 경우, 권한이 없다면 Forbidden
@@ -6,7 +7,11 @@ exports.isLoggedIn = (req, res, next) => {
         next();
     }
     else {  // 권한이 필요한 경우인데, 토큰검사가 아니라 로그인 검사를 한 경우. -> 서버 코드가 잘못 된 경우
-        return res.status(500).json({"error": "Server Logic Error"});
+        return res.status(500).json({
+            success: false,
+            code: 500,
+            error: "Internal Server Error",
+        });
     }
 };
 
@@ -15,23 +20,29 @@ exports.isNotLoggedIn = (req, res, next) => {
     if (!req.isAuthenticated()) {
         next();
     }
-    // @질문 이 전략이 맞는지 모르겠음.
-    // 로그인이 되어 있는데 권한을 요청 -> 서버 로직이 꼬여서 도달하게 되는 부분. 따라서 500 반환
+    // 로그인이 되어 있는데 권한을 요청
     else {
-        return res.status(500).json({"error": "Server Logic Error"});
+        return res.status(400).json({
+            success: false,
+            code: 400,
+            error: "Already logged in",
+        });
     }
 };
 
-// 토큰이 존재하는지 확인.
-exports.verifyToken = (req, res, next) => {
+// 액세스 토큰이 존재하는지 확인.
+exports.verifyAccessToken = (req, res, next) => {
     try {
-        // 2번째 인자인 토큰의 비밀키는 서버에 내장 되어있다.
-        req.decoded = jwt.verify(req.headers.authorization, process.env.JWT_SECRET);
+        // header 의 Bearer 뒤에 붙은 토큰 파싱
+        const accessToken = req.headers.authorization.split("Bearer ")[1];
+        // 미리 생성한 모듈을 통해 AccessToken 검사
+        req.decoded = verifyAccess(accessToken);
         next();     // 나머지 라우팅을 하기 위해 미들웨어 next()로 넘겨준다.
     }
     catch (error) {
+        console.log(error);
         if (error.name === "TokenExpiredError") {
-            // TODO 토큰 만료된 경우를 위해서, 419 짜놓긴 했는데 아직 언제 어떻게 쓰일지를 몰라서 보완해야 하는 부분
+            // Access Token 이 만료된 상황 -> 419를 보내서 Refresh Token 으로 Access Token 을 재발급 받으라고 설정
             return res.status(419).json({
                 success: false,
                 code: 419,
@@ -42,7 +53,7 @@ exports.verifyToken = (req, res, next) => {
         return res.status(401).json({
             success: false,
             code: 401,
-            error: "Invalid Token",
+            error: "Invalid Access Token",
         });
     }
 };

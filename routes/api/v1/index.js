@@ -1,87 +1,18 @@
 const express = require('express');
-const passport = require('passport');
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
 
-const { isNotLoggedIn, verifyToken } = require('../../../middlewares/auth');
-const { User } = require('../../../models');
+const authRouter = require('./auth');
+const userRouter = require('./user');
 
 const router = express.Router();
 
-// POST 회원가입 -> POST /api/v1/auth/join
-router.post('/join', isNotLoggedIn, async (req, res, next) => {
-    const { email, nick, password } = req.body;
-    try {
-        const exUser = await User.findOne({ where: { email }});
-        if (exUser) {
-            return res.status(200).json({
-                success: false,
-                code: 200
-            });
-        }
-        // 비밀번호 생으로 들어온다고 가정하고 우선 백에서 솔트 12번 침
-        const hash = await bcrypt.hash(password, 12);
-        await User.create({ email, nick, password: hash });
-        return res.status(201).json({
-            success: true,
-            code: 201
-        });
-    }
-    catch (error) {
-        console.error(error);
-        return next(error);
-    }
-});
+// base URL: /api/v1
 
-// POST 로그인 -> POST /api/v1/auth/login
-router.post('/login', isNotLoggedIn, (req, res, next) => {
-    passport.authenticate('local', (authError, user, info) => {
-        if(authError) {     // authenticate 자체 에러가 나는 경우
-            console.error(authError);
-            return next(authError);
-        }
-        if (!user) {
-            return res.status(401).json({
-                success: false,
-                code: 401,
-                error: info.message
-            });
-        }
-        return req.login(user, (loginError) => {    // passport 가 req 에게 login 을 심는다.
-            if(loginError) {
-                return res.status(401).json({
-                    success: false,
-                    code: 401,
-                    error: info.message
-                });
-            }
-            // jwt 발급
-            const token = jwt.sign({
-                email: user.email,
-                nick: user.nick,
-            }, process.env.JWT_SECRET, {
-                expiresIn: '10m',           // 아직 refresh token 을 공부를 못해서 만료 기한을 애매하게 10분으로 설정했음.
-                issuer: "pangpang",
-            });
-            res.cookie("token", token);
-            return res.status(200).json({
-                success: true,
-                code: 200,
-            });
-        });
-    })(req, res, next);
-});
-
-router.get('/logout', verifyToken, (req, res) => {
-    console.log(req.headers);
-    req.logout();
-    res.status(200).json({
-        success: true,
-        code: 200
-    });
-});
+router.use('/auth', authRouter);
+//router.use('/user', userRouter);
 
 module.exports = router;
+
+// Swagger - API Documentation
 
 /**
  * @swagger
