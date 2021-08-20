@@ -8,19 +8,24 @@ const router = express.Router();
 // base URL: /api/v1
 
 router.use('/auth', authRouter);
-//router.use('/user', userRouter);
+router.use('/user', userRouter);
 
 module.exports = router;
 
 // Swagger - API Documentation
 
+// Swagger Tags
 /**
  * @swagger
  * tags:
- *      name: Authentication
+ *    - name: Authentication
  *      description: about authentication and authorization
+ *    - name: User
+ *      description: about User Information
  */
 
+
+// Swagger Definitions (Responses: Argument Object)
 /**
  * @swagger
  * definitions:
@@ -45,8 +50,16 @@ module.exports = router;
  *                  type: string
  *              password:
  *                  type: string
+ *      Profile:
+ *          properties:
+ *              email:
+ *                  type: string
+ *              nick:
+ *                  type: string
  */
 
+
+// Swagger Parameters (Requests)
 /**
  * @swagger
  * parameters:
@@ -68,8 +81,22 @@ module.exports = router;
  *          in: json
  *          required: true
  *          type: string
+ *      accessToken:
+ *          name: accessToken
+ *          description: Access Token
+ *          in: headers
+ *          require: true
+ *          type: string
+ *      refreshToken:
+ *          name: refreshToken
+ *          description: Refresh Token
+ *          in: headers
+ *          require: true
+ *          type: string
  */
 
+
+// Swagger Definitions (Responses: Status Code)
 /**
  * @swagger
  * definitions:
@@ -95,6 +122,9 @@ module.exports = router;
  *                      description: error message
  */
 
+
+// Swagger - Authentication
+// GET - logout, accessToken,
 /**
  * @swagger
  * /auth/logout:
@@ -111,7 +141,38 @@ module.exports = router;
  *                      schema:
  *                          $ref: '#/definitions/schemas/2xx'
  */
-
+/**
+ * @swagger
+ * /auth/accessToken:
+ *  get:
+ *      tags: [Authentication]
+ *      description: Get Access Token using Refresh Token
+ *      produces:
+ *          - application/json
+ *      parameters:
+ *          - $ref: '#/parameters/accessToken'
+ *          - $ref: '#/parameters/refreshToken'
+ *      responses:
+ *          200:
+ *              description: OK
+ *              content:
+ *                  application/json:
+ *                      schema:
+ *                          $ref: '#definitions/schemas/2xx'
+ *          400:
+ *              description: Bad Request
+ *              content:
+ *                  application/json:
+ *                      schema:
+ *                          $ref: '#/definitions/schemas/4xx'
+ *          401:
+ *              description: Unauthorized
+ *              content:
+ *                  application/json:
+ *                      schema:
+ *                          $ref: '#/definitions/schemas/4xx'
+ */
+// POST - join, login
 /**
  * @swagger
  * /auth/join:
@@ -132,20 +193,12 @@ module.exports = router;
  *                      schema:
  *                          $ref: '#/definitions/schemas/2xx'
  *          401:
- *              description: Unauthorized, Login Required
+ *              description: Unauthorized
  *              content:
  *                  application/json:
  *                      schema:
  *                          $ref: '#/definitions/schemas/4xx'
- *          403:
- *              description: Forbidden, No Permission
- *              content:
- *                  application/json:
- *                      schema:
- *                          $ref: '#/definitions/schemas/4xx'
- *
  */
-
 /**
  * @swagger
  * /auth/login:
@@ -165,16 +218,44 @@ module.exports = router;
  *                      schema:
  *                          $ref: '#/definitions/schemas/2xx'
  *          401:
- *              description: Unauthorized, Login Required
+ *              description: Unauthorized
  *              content:
  *                  application/json:
  *                      schema:
  *                          $ref: '#/definitions/schemas/4xx'
- *          403:
- *              description: Forbidden, No Permission
+ */
+
+
+// Swagger - User
+// GET - profile
+/**
+ * @swagger
+ * /user/profile:
+ *  get:
+ *      tags: [User]
+ *      description: Get User Information
+ *      produces:
+ *          - application/json
+ *      parameters:
+ *          - $ref: '#/parameters/accessToken'
+ *      responses:
+ *          200:
+ *              description: OK
+ *              content:
+ *                  application/json:
+ *                      schema:
+ *                          type: object
+ *                          $ref: '#/definitions/Profile'
+ *          401:
+ *              description: Unauthorized
  *              content:
  *                  application/json:
  *                      schema:
  *                          $ref: '#/definitions/schemas/4xx'
- *
+ *          419:
+ *              description: Authentication Timeout
+ *              content:
+ *                  application/json:
+ *                      schema:
+ *                          $ref: '#/definitions/schemas/4xx'
  */
