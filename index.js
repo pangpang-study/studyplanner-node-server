@@ -4,6 +4,7 @@ const cookieParser = require('cookie-parser');
 const morgan = require('morgan');
 const dotenv = require('dotenv');
 const passport = require('passport');
+const session = require('express-session');
 
 const swaggerDoc = require('./swaggerDoc');
 const { sequelize } = require('./models');
@@ -14,6 +15,7 @@ const v1Router = require('./routes/api/v1');
 dotenv.config();
 
 const app = express();
+
 passportConfig();
 app.set('port', process.env.PORT || 5000);
 
@@ -31,9 +33,17 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser(process.env.COOKIE_SECRET));
-
+// app.use(session({
+//     resave: false,
+//     saveUninitialized: false,
+//     secret: process.env.COOKIE_SECRET,
+//     cookie: {
+//         httpOnly: true,
+//         secure: false,
+//     },
+// }));
 app.use(passport.initialize());     // req 객체에 passport 설정을 심는다.
-app.use(passport.session());        // req.session 객체에 passport 정보를 저장. -> session 보다 뒤에 있어야함.
+// app.use(passport.session());        // req.session 객체에 passport 정보를 저장. -> session 보다 뒤에 있어야함.
 
 app.use('/api/v1', v1Router);
 

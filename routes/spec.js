@@ -1,4 +1,3 @@
-const should = require('should');
 const request = require('supertest');
 const chai = require('chai');
 const http = require('chai-http');

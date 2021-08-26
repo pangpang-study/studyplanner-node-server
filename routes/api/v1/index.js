@@ -50,6 +50,15 @@ module.exports = router;
  *                  type: string
  *              password:
  *                  type: string
+ *      Logout:
+ *          required:
+ *              - Access Token
+ *              - Refresh Token
+ *          properties:
+ *              Access Token:
+ *                  type: string
+ *              Refresh Token:
+ *                  type: string
  *      Profile:
  *          properties:
  *              email:
@@ -84,13 +93,13 @@ module.exports = router;
  *      accessToken:
  *          name: accessToken
  *          description: Access Token
- *          in: headers
+ *          in: headers authorization Bearer
  *          require: true
  *          type: string
  *      refreshToken:
  *          name: refreshToken
  *          description: Refresh Token
- *          in: headers
+ *          in: headers refresh
  *          require: true
  *          type: string
  */
@@ -124,26 +133,10 @@ module.exports = router;
 
 
 // Swagger - Authentication
-// GET - logout, accessToken,
+// GET - token,
 /**
  * @swagger
- * /auth/logout:
- *  get:
- *      tags: [Authentication]
- *      description: Logout
- *      produces:
- *          - application/json
- *      responses:
- *          200:
- *              description: OK
- *              content:
- *                  application/json:
- *                      schema:
- *                          $ref: '#/definitions/schemas/2xx'
- */
-/**
- * @swagger
- * /auth/accessToken:
+ * /auth/token:
  *  get:
  *      tags: [Authentication]
  *      description: Get Access Token using Refresh Token
@@ -171,6 +164,12 @@ module.exports = router;
  *                  application/json:
  *                      schema:
  *                          $ref: '#/definitions/schemas/4xx'
+ *          419:
+ *              description: Refresh Token Timeout, You should login again
+ *              content:
+ *                  application/json:
+ *                      schema:
+ *                          $ref: '#/definitions/schemas/4xx'
  */
 // POST - join, login
 /**
@@ -186,14 +185,20 @@ module.exports = router;
  *          - $ref: '#/parameters/nick'
  *          - $ref: '#/parameters/password'
  *      responses:
- *          200:
- *              description: OK
+ *          201:
+ *              description: Created Successfully
  *              content:
  *                  application/json:
  *                      schema:
  *                          $ref: '#/definitions/schemas/2xx'
- *          401:
- *              description: Unauthorized
+ *          400:
+ *              description: Already Logged in
+ *              content:
+ *                  application/json:
+ *                      schema:
+ *                          $ref: '#/definitions/schemas/4xx'
+ *          422:
+ *              description: Requested Email Already Exists
  *              content:
  *                  application/json:
  *                      schema:
@@ -216,9 +221,51 @@ module.exports = router;
  *              content:
  *                  application/json:
  *                      schema:
+ *                          properties:
+ *                              success:
+ *                                  type: boolean
+ *                                  description: whether it succeed
+ *                              code:
+ *                                  type: string
+ *                                  description: response status code
+ *                              accessToken:
+ *                                  type: string
+ *                                  description: jwt for authentication
+ *                              refreshToken:
+ *                                  type: string
+ *                                  description: jwt for refresh access token
+ *          401:
+ *              description: Unauthorized
+ *              content:
+ *                  application/json:
+ *                      schema:
+ *                          $ref: '#/definitions/schemas/4xx'
+ */
+/**
+ * @swagger
+ * /auth/logout:
+ *  post:
+ *      tags: [Authentication]
+ *      description: Logout
+ *      produces:
+ *          - application/json
+ *      parameters:
+ *          - $ref: '#/parameters/accessToken'
+ *      responses:
+ *          200:
+ *              description: OK
+ *              content:
+ *                  application/json:
+ *                      schema:
  *                          $ref: '#/definitions/schemas/2xx'
  *          401:
  *              description: Unauthorized
+ *              content:
+ *                  application/json:
+ *                      schema:
+ *                          $ref: '#/definitions/schemas/4xx'
+ *          419:
+ *              description: Access Token timeout, which means already logged out
  *              content:
  *                  application/json:
  *                      schema:

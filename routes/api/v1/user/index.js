@@ -1,6 +1,6 @@
 const profile = require('./profile');
 
-const { verifyAccessToken } = require('../../../../middlewares/auth')
+const { verifyAccessToken } = require('../../../../utils/auth')
 
 const express = require('express');
 const router = express.Router();

@@ -1,24 +1,23 @@
 const jwt = require('jsonwebtoken');
 const redisClient = require('./redis');
-const { promisify } = require('util');
+
+const { accessOption, refreshOption } = require('../config/jwt-options');
 
 module.exports = {
+    // Access Token 발급 하는 모듈
     sign: (user) => {
         const payload = {
             email: user.email,
             nick: user.nick,
         };
-        return jwt.sign(payload, process.env.JWT_SECRET,{
-            algorithm: 'HS512',
-            expiresIn: '1h',
-        });
+        return jwt.sign(payload, process.env.JWT_SECRET, accessOption);
     },
+    // Refresh Token 발급 하는 모듈
     refresh: () => {
-        return jwt.sign({}, process.env.JWT_SECRET, {
-            algorithm: 'HS512',
-            expiresIn: '10d',
-        });
+        return jwt.sign({}, process.env.JWT_SECRET, refreshOption);
     },
+
+    // Access Token 상태 확인 하는 모듈
     verifyAccess: (accessToken) => {
         let decoded = null;
         try {
@@ -27,22 +26,36 @@ module.exports = {
                 success: true,
                 email: decoded.email,
                 nick: decoded.nick,
+                error: null
             };
         }
         catch (err) {
+            // 만료된 토큰 에서 payload 빼내기
+            if (err.message === 'jwt expired'){
+                const payload = jwt.verify(accessToken, process.env.JWT_SECRET, {ignoreExpiration: true} );
+                return {
+                    success: false,
+                    email: payload.email,
+                    nick: payload.nick,
+                    error: err.message,
+                }
+            }
             return {
                 success: false,
+                email: undefined,
+                nick: undefined,
                 error: err.message,
             }
         }
     },
-    verifyRefresh: async (aRefreshToken, userEmail) => {
-        const getToken = promisify(redisClient.get).bind(redisClient);
+
+    // Refresh Token 상태 확인 하는 모듈
+    verifyRefresh: async (refreshToken, userEmail) => {
         try {
-            const sRefreshToken = await getToken(userEmail);
-            if (aRefreshToken === sRefreshToken) {
+            const data = await redisClient.get(userEmail);
+            if (data === refreshToken) {
                 try {
-                    jwt.verify(aRefreshToken, process.env.JWT_SECRET);
+                    jwt.verify(refreshToken, process.env.JWT_SECRET);
                     return true;
                 }
                 catch (err) {
@@ -54,6 +67,7 @@ module.exports = {
             }
         }
         catch (err) {
+            console.log(err);
             return false;
         }
     }

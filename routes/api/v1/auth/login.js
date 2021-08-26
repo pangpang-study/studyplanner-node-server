@@ -1,15 +1,17 @@
 const jwt = require('../../../../utils/jwt');
+const { redisClient } = require('../../../../utils/redis');
 
 const passport = require('passport');
 
 // POST 로그인 -> POST /api/v1/auth/login
-// return { cookie { accessToken, refreshToken }}
 const login = async (req, res, next) => {
-    passport.authenticate('local', (authError, user, info) => {
+    passport.authenticate('local', {session: false}, (authError, user) => {
+        // 이미 콜백에서 에러가 넘어온 경우 -> 다음 미들웨어로 에러 전송
         if(authError) {
             console.error(authError);
             return next(authError);
         }
+        // 유저가 없는 경우 -> 401 Unauthorized 전송
         if (!user) {
             return res.status(401).json({
                 success: false,
@@ -17,7 +19,9 @@ const login = async (req, res, next) => {
                 error: "User not exist"
             });
         }
+        // 로그인 시도
         return req.login(user, {session: false}, (loginError) => {
+            // 로그인 오류 -> 401 Unauthorized 반환
             if(loginError) {
                 return res.status(401).json({
                     success: false,
@@ -25,19 +29,20 @@ const login = async (req, res, next) => {
                     error: loginError
                 });
             }
-            // Token 발급
+            // 로그인 성공 -> 2개의 토큰 발급
             const accessToken = jwt.sign(user);
             const refreshToken = jwt.refresh();
 
-            // JWT 토큰을 Cookie 에 넣어서 보내주는 경우 HttpOnly 옵션을 넣어야 XSS 공격을 피할 수 있다.
-            // cookie 에 Max Age 옵션을 넣어 자동 파기 되도록 하였다. 15일간 유지되도록. 어차피 토큰이 더 빨리 사라진다.
-            // httpOnly Method 는 DOM 으로 쿠키 조작을 못하게 막는 것,
-            // secure 는 HTTPS 만 사용가능 하도록 하는 것인데 일단 뺐음.
-            res.cookie("accessToken", accessToken, { maxAge: 86400 * 15, httpOnly: true });
-            res.cookie("refreshToken", refreshToken, { maxAge: 86400 * 15, httpOnly: true });
+            // redis set
+            // TODO Redis 는 Hash 인가?? -> user.email 은 key 인데 중복되면 어떻게 동작하나?
+            redisClient.set(user.email, refreshToken, "EX", 1200);
+
+            // Access, Refresh Token 은 Entity Body 에 넣어서 보내는게 좋다고 한다.
             return res.status(200).json({
                 success: true,
                 code: 200,
+                access: accessToken,
+                refresh: refreshToken
             });
         });
     })(req, res, next);

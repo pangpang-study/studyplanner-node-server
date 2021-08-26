@@ -7,26 +7,22 @@ const User = require('../models/user');
 module.exports = () => {
     passport.use(new LocalStrategy({
         usernameField: 'email',
-        passwordField: 'password',
+        passwordField: 'password'
     }, async (email, password, done) => {
         try {
-            const exUser = await User.findOne({ where: { email } });
-            if (exUser) {
-                const result = await bcrypt.compare(password, exUser.password);
-                if (result) {
-                    done(null, exUser);
-                }
-                else {
-                    done(null, false, {message: "비밀번호가 일치하지 않습니다."});
-                }
+            const user = await User.findOne({where: {email: email}});
+            if (!user) {
+                return done(null, false, {message:"No Such User"});
             }
-            else {
-                done(null, false, { message: "가입되지 않은 회원입니다." });
+            const userVerified = await bcrypt.compare(password, user.password);
+            if (!userVerified) {
+                return done(null, false, {message:"Wrong Password"});
             }
+            return done(null, user, {message: 'Logged In Successfully'});
         }
-        catch (error) {
-            console.error(error);
-            done(error);
+        catch (err) {
+            console.log(err);    // only for err
+            done(err);
         }
-    }));
+    }))
 };
